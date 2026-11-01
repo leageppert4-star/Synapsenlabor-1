@@ -1,0 +1,1306 @@
+<!doctype html><html lang="de"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><title>Synapsenlabor</title>
+<style>
+/* Layout: Laborbank – großes Präparat links mit Oszilloskop darunter, Bedienpult rechts; auf dem Handy untereinander */
+:root {
+  --bg: #ECEFF1; --panel: #F9FAFB; --ink: #15202A; --muted: #556270; --rule: #D2D9DF;
+  --accent: #1F5F99; --accent-ink: #FFFFFF; --focus: #1F5F99;
+  --ca: #7448C8; --na: #D2601C; --ach: #C42C71; --ache: #24855A; --toxin: #8A1F33;
+  --extra: #D6E3E7; --pre: #E6E9F4; --post: #F2E6E0; --mem: #A08D79; --mem-core: #DCCFBF;
+  --protein: #3D6687; --mito: #DCCFE6; --mito-line: #8E77A6; --vesicle: #FCFBFE; --label: #15202A; --halo: rgba(214,227,231,0.9);
+  --ok: #1B7046; --ok-bg: #DCEFE3; --warn: #7F5300; --warn-bg: #F6EACB; --crit: #971B2B; --crit-bg: #F5DADE; --neutral-bg: #E2E7EB;
+  --scope-bg: #0B1114; --scope-grid: rgba(120,170,185,0.16); --scope-text: #8FA6B0;
+  --tr-pre: #7DB8F2; --tr-ach: #F06AA8; --tr-post: #FFA45C; --tr-th: #E9C46A;
+  --f-display: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --f-body: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E1316; --panel: #151C21; --ink: #E2E8ED; --muted: #93A1AD; --rule: #28333B;
+    --accent: #78AEE6; --accent-ink: #0B1520; --focus: #78AEE6;
+    --ca: #A88BF2; --na: #F3904E; --ach: #F2649F; --ache: #52C48F; --toxin: #F1798A;
+    --extra: #13222A; --pre: #1E2333; --post: #2A211F; --mem: #857563; --mem-core: #3F382F;
+    --protein: #6A9BC2; --mito: #332A40; --mito-line: #8C76A3; --vesicle: #262B3A; --label: #E2E8ED; --halo: rgba(19,34,42,0.88);
+    --ok: #6FD3A0; --ok-bg: #163126; --warn: #E9B85A; --warn-bg: #33280F; --crit: #F28A97; --crit-bg: #3A1A20; --neutral-bg: #1F282F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E1316; --panel: #151C21; --ink: #E2E8ED; --muted: #93A1AD; --rule: #28333B;
+  --accent: #78AEE6; --accent-ink: #0B1520; --focus: #78AEE6;
+  --ca: #A88BF2; --na: #F3904E; --ach: #F2649F; --ache: #52C48F; --toxin: #F1798A;
+  --extra: #13222A; --pre: #1E2333; --post: #2A211F; --mem: #857563; --mem-core: #3F382F;
+  --protein: #6A9BC2; --mito: #332A40; --mito-line: #8C76A3; --vesicle: #262B3A; --label: #E2E8ED; --halo: rgba(19,34,42,0.88);
+  --ok: #6FD3A0; --ok-bg: #163126; --warn: #E9B85A; --warn-bg: #33280F; --crit: #F28A97; --crit-bg: #3A1A20; --neutral-bg: #1F282F;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: clamp(16px, 3vw, 32px); padding-block: 22px 40px; display: grid; gap: 22px; }
+
+header.top { display: grid; gap: 6px; }
+.eyebrow { margin: 0; font-family: var(--f-mono); font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-family: var(--f-display); font-weight: 750; font-size: clamp(2rem, 4.2vw, 2.9rem); line-height: 1.02; letter-spacing: -0.02em; text-wrap: balance; }
+.lede { margin: 2px 0 0; max-width: 66ch; color: var(--muted); font-size: 1.02rem; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 350px; grid-template-rows: auto auto auto auto 1fr; gap: 18px 22px; align-items: start; }
+.layout > .stage { grid-column: 1; grid-row: 1; }
+.layout > .scope { grid-column: 1; grid-row: 2; }
+.layout > .steps-card { grid-column: 1; grid-row: 3; }
+.layout > .model { grid-column: 1; grid-row: 4; }
+.layout > .panel { grid-column: 2; grid-row: 1 / 6; }
+.steps-card { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.steps-card h2 { margin: 0; font-family: var(--f-mono); font-size: 0.74rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+.stage { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; min-width: 0; }
+.stage-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+.btn { font: 700 0.9rem/1 var(--f-body); padding: 9px 14px; border-radius: 8px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn:active { transform: translateY(1px); }
+.btn:focus-visible, .link:focus-visible, summary:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.status { margin-left: auto; font-family: var(--f-mono); font-size: 0.78rem; padding: 5px 11px; border-radius: 999px; background: var(--neutral-bg); color: var(--muted); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.status.ok { background: var(--ok-bg); color: var(--ok); }
+.status.warn { background: var(--warn-bg); color: var(--warn); }
+.status.crit { background: var(--crit-bg); color: var(--crit); }
+
+.canvas-wrap { position: relative; width: 100%; }
+#sim { display: block; width: 100%; height: 400px; background: var(--extra); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 10px 14px; border-top: 1px solid var(--rule); font-size: 0.84rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { width: 12px; height: 12px; flex: none; }
+
+.readouts { margin: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--rule); }
+.readouts div { padding: 10px 14px; min-width: 0; }
+.readouts div + div { border-left: 1px solid var(--rule); }
+.readouts dt { font-size: 0.74rem; color: var(--muted); letter-spacing: 0.02em; }
+.readouts dd { margin: 2px 0 0; font-family: var(--f-mono); font-size: 1.02rem; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.scope { background: var(--scope-bg); border-radius: 14px; overflow: hidden; color: var(--scope-text); min-width: 0; }
+.scope-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; align-items: baseline; padding: 10px 14px 4px; }
+.scope-head h2 { margin: 0; font-family: var(--f-mono); font-size: 0.74rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--scope-text); }
+.scope-head span { font-family: var(--f-mono); font-size: 0.76rem; font-variant-numeric: tabular-nums; }
+#scope { display: block; width: 100%; height: 250px; }
+
+details.model { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 4px 16px; }
+details.model summary { cursor: pointer; padding: 10px 0; font-weight: 700; }
+details.model ul { margin: 0 0 14px; padding-left: 1.1em; display: grid; gap: 7px; max-width: 78ch; color: var(--muted); }
+details.model li strong { color: var(--ink); }
+
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; min-width: 0; }
+.panel section { padding: 16px 18px; display: grid; gap: 12px; }
+.panel section + section { border-top: 1px solid var(--rule); }
+.panel h2 { margin: 0; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-family: var(--f-mono); font-size: 0.74rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.link { font: 700 0.78rem var(--f-body); letter-spacing: 0; text-transform: none; background: none; border: 0; padding: 2px 0; color: var(--accent); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+.field { display: grid; gap: 4px; }
+.field label { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 0.92rem; }
+.field output { font-family: var(--f-mono); font-size: 0.84rem; font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+.field small { color: var(--muted); font-size: 0.78rem; line-height: 1.35; }
+input[type="range"] { width: 100%; accent-color: var(--accent); margin: 2px 0; }
+input[type="range"]:disabled { opacity: 0.4; }
+.switch { display: flex; align-items: center; gap: 10px; font-size: 0.92rem; cursor: pointer; }
+.switch input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { position: relative; }
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip span { display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border: 1px solid var(--rule); border-radius: 999px; font-size: 0.86rem; cursor: pointer; background: var(--bg); color: var(--ink); }
+.chip span:hover { border-color: var(--muted); }
+.chip svg { width: 11px; height: 11px; fill: var(--toxin); }
+.chip input:checked + span { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip input:checked + span svg { fill: currentColor; }
+.chip input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.tox { display: grid; gap: 8px; }
+.tox h3 { margin: 0; font-family: var(--f-display); font-weight: 600; font-size: 1.12rem; }
+.tox p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.site { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; font-family: var(--f-mono); font-size: 0.68rem; letter-spacing: 0.04em; text-transform: uppercase; }
+.site span { text-align: center; padding: 4px 2px; border-radius: 4px; background: var(--neutral-bg); color: var(--muted); }
+.site span.on { background: var(--toxin); color: var(--panel); }
+
+ol.steps { list-style: none; margin: 0; padding: 0; columns: 2 300px; column-gap: 32px; counter-reset: step; }
+ol.steps li { break-inside: avoid; margin-bottom: 10px; counter-increment: step; display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 10px; align-items: start; font-size: 0.88rem; color: var(--muted); transition: color 0.2s; }
+ol.steps li::before { content: counter(step); display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--rule); font-family: var(--f-mono); font-size: 0.76rem; background: var(--bg); color: var(--muted); transition: background 0.2s, color 0.2s, border-color 0.2s; }
+ol.steps li.active { color: var(--ink); }
+ol.steps li.active::before { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+ul.tasks { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; font-size: 0.88rem; color: var(--muted); }
+ul.tasks strong { color: var(--ink); font-weight: 700; }
+
+footer { color: var(--muted); font-size: 0.8rem; }
+
+@media (max-width: 1000px) {
+  .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  .layout > .stage, .layout > .scope, .layout > .steps-card, .layout > .model, .layout > .panel { grid-column: 1; grid-row: auto; }
+  .layout > .stage { order: 1; } .layout > .scope { order: 2; } .layout > .panel { order: 3; } .layout > .steps-card { order: 4; } .layout > .model { order: 5; }
+}
+@media (max-width: 560px) {
+  .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .readouts div:nth-child(3) { border-left: 0; }
+  .readouts div:nth-child(n+3) { border-top: 1px solid var(--rule); }
+  .status { margin-left: 0; flex-basis: 100%; text-align: center; }
+  .btn { flex: 1 1 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ol.steps li, ol.steps li::before { transition: none; }
+}
+</style></head><body>
+
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">Neurobiologie · Erregungsübertragung</p>
+    <h1>Synapsenlabor</h1>
+    <p class="lede">Eine erregende, cholinerge Synapse zum Ausprobieren. Löse Aktionspotenziale aus, wähle ein Synapsengift und beobachte, an welcher Stelle es in die Erregungsübertragung eingreift.</p>
+  </header>
+
+  <main class="layout">
+      <section class="stage" aria-label="Simulation der Synapse">
+        <div class="stage-bar">
+          <button id="btnAP" class="btn primary" type="button" title="Tastenkürzel: Leertaste">Aktionspotenzial auslösen</button>
+          <button id="btnPause" class="btn" type="button" aria-pressed="false">Pause</button>
+          <button id="btnReset" class="btn" type="button">Zurücksetzen</button>
+          <span id="status" class="status" role="status" aria-live="polite">Ruhezustand</span>
+        </div>
+        <div class="canvas-wrap" id="simWrap">
+          <canvas id="sim" role="img" aria-label="Schnitt durch eine Synapse: oben das Endknöpfchen mit Vesikeln, in der Mitte der synaptische Spalt, unten die postsynaptische Membran mit Acetylcholin-Rezeptoren."></canvas>
+        </div>
+        <div class="legend" id="legend">
+          <span><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" style="fill:var(--ca)"/></svg>Ca²⁺</span>
+          <span><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" style="fill:var(--na)"/></svg>Na⁺</span>
+          <span><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4.5" style="fill:var(--ach)"/></svg>Acetylcholin (ACh)</span>
+          <span><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="4" style="fill:none;stroke:var(--ach);stroke-width:1.8"/></svg>Cholin</span>
+          <span><svg viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="2.6" style="fill:var(--muted)"/></svg>Acetat</span>
+          <span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.2 A4.8 4.8 0 1 0 10.2 3.6 L6 6 Z" style="fill:var(--ache)"/></svg>Acetylcholinesterase</span>
+          <span id="legTox" hidden><svg viewBox="0 0 12 12" aria-hidden="true" id="legToxIcon"></svg><span id="legToxName">Gift</span></span>
+        </div>
+        <dl class="readouts">
+          <div><dt>Membranpotenzial Postsynapse</dt><dd id="rV">−70 mV</dd></div>
+          <div><dt>Offene Rezeptorkanäle</dt><dd id="rOpen">0 / 10</dd></div>
+          <div><dt>ACh im Spalt</dt><dd id="rAch">0</dd></div>
+          <div><dt>Vesikel angedockt · gesamt</dt><dd id="rVes">6 · 16</dd></div>
+        </dl>
+      </section>
+
+      <section class="scope" aria-label="Oszilloskop">
+        <div class="scope-head">
+          <h2>Oszilloskop</h2>
+          <span id="apCount">Aktionspotenziale: 0 prä · 0 post</span>
+        </div>
+        <div id="scopeWrap"><canvas id="scope" role="img" aria-label="Verlauf von präsynaptischem Membranpotenzial, Acetylcholin-Menge im Spalt und postsynaptischem Membranpotenzial über die letzten Millisekunden."></canvas></div>
+      </section>
+
+      <section class="steps-card" aria-label="Ablauf der Übertragung">
+        <h2>Ablauf der Übertragung</h2>
+        <ol class="steps" id="steps">
+          <li>Ein Aktionspotenzial erreicht das Endknöpfchen und depolarisiert die präsynaptische Membran.</li>
+          <li>Spannungsgesteuerte Ca²⁺-Kanäle öffnen sich, Ca²⁺ strömt in das Endknöpfchen.</li>
+          <li>Ca²⁺ löst die Exocytose aus: Vesikel verschmelzen mit der Membran und geben Acetylcholin frei.</li>
+          <li>Acetylcholin diffundiert durch den synaptischen Spalt.</li>
+          <li>ACh bindet an Rezeptoren der Postsynapse. Mit zwei gebundenen Molekülen öffnet der Ionenkanal.</li>
+          <li>Na⁺ strömt ein, es entsteht ein EPSP. Erreicht es die Schwelle, folgt ein Aktionspotenzial.</li>
+          <li>Acetylcholinesterase spaltet ACh in Cholin und Acetat. Cholin wird ins Endknöpfchen zurücktransportiert.</li>
+        </ol>
+      </section>
+
+      <details class="model">
+        <summary>Modellannahmen und Grenzen</summary>
+        <ul>
+          <li><strong>Zeit.</strong> Die Zeitachse des Oszilloskops zeigt Millisekunden. Die Diffusion durch den Spalt ist im Modell stark verlangsamt; real dauert sie nur Mikrosekunden, die synaptische Verzögerung insgesamt etwa 0,5 ms.</li>
+          <li><strong>Größen.</strong> Der synaptische Spalt ist real nur 20 bis 50 nm breit und hier stark vergrößert gezeichnet.</li>
+          <li><strong>Teilchenzahlen.</strong> Ein Vesikel enthält real mehrere tausend ACh-Moleküle, hier stehen 10 Symbole dafür. Auch die Ionen sind nur stellvertretend gezeigt.</li>
+          <li><strong>Rezeptor.</strong> Der nikotinische ACh-Rezeptor öffnet erst, wenn zwei ACh-Moleküle gebunden sind. Er ist ein Kationenkanal, durch den neben Na⁺ auch K⁺ fließt; gezeigt wird nur der Na⁺-Einstrom, der netto überwiegt. Muskarinische Rezeptoren (Parasympathikus) sind nicht dargestellt; Muscarin und Atropin zeigen deshalb an dieser Synapse keine Wirkung.</li>
+          <li><strong>Membranpotenzial.</strong> Die Postsynapse ist als passive Membran mit Schwelle (−50 mV) modelliert, nicht mit Hodgkin-Huxley-Kinetik. Dass anhaltende Depolarisation die Na⁺-Kanäle inaktiviert, steckt vereinfacht in einer einzigen Variablen.</li>
+          <li><strong>Nicht modelliert.</strong> Desensibilisierung der Rezeptoren, Ca²⁺-Pumpen, die K⁺-Kanäle der Präsynapse und die Synthese von ACh aus Cholin und Acetyl-CoA im Detail. Spontane Einzelfreisetzungen (Miniaturpotenziale) kommen selten vor.</li>
+          <li><strong>Zufall.</strong> Freisetzung, Bindung und Abbau sind stochastisch. Gleiche Einstellungen führen deshalb nicht jedes Mal zum gleichen Ergebnis.</li>
+        </ul>
+      </details>
+
+    <aside class="panel" aria-label="Bedienfeld">
+      <section hidden>
+        <h2>Reizung</h2>
+        <label class="switch"><input type="checkbox" id="train">Dauerreizung des Axons</label>
+        <div class="field">
+          <label for="freq">Frequenz <output id="freqOut" for="freq">40 Hz · alle 25 ms</output></label>
+          <input type="range" id="freq" min="5" max="200" step="5" value="40">
+          <small>Einzelne Aktionspotenziale löst der Knopf über der Synapse aus, oder die Leertaste.</small>
+        </div>
+      </section>
+
+      <section hidden>
+        <h2>Bedingungen <button type="button" class="link" id="btnDefaults">Standardwerte</button></h2>
+        <div class="field">
+          <label for="caOut">Ca²⁺-Konzentration außen <output id="caOutOut" for="caOut">2,0 mM</output></label>
+          <input type="range" id="caOut" min="0" max="4" step="0.1" value="2">
+        </div>
+        <div class="field">
+          <label for="nRec">ACh-Rezeptoren <output id="nRecOut" for="nRec">10</output></label>
+          <input type="range" id="nRec" min="2" max="14" step="1" value="10">
+        </div>
+        <div class="field">
+          <label for="ache">Aktivität der Acetylcholinesterase <output id="acheOut" for="ache">100 %</output></label>
+          <input type="range" id="ache" min="0" max="150" step="10" value="100">
+        </div>
+      </section>
+
+      <section>
+        <h2>Synapsengift</h2>
+        <p style="margin:0;font-size:0.84rem;color:var(--muted)">Wähle ein Gift und löse mit dem Knopf über der Synapse (oder der Leertaste) einige Aktionspotenziale aus.</p>
+        <div class="chips" role="radiogroup" aria-label="Synapsengift wählen">
+          <label class="chip"><input type="radio" name="tox" value="none" checked><span>Keins</span></label>
+          <label class="chip"><input type="radio" name="tox" value="nic"><span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0.8 L10.5 3.4 L10.5 8.6 L6 11.2 L1.5 8.6 L1.5 3.4 Z"/></svg>Nikotin</span></label>
+          <label class="chip"><input type="radio" name="tox" value="cur"><span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1 L11 10.5 L1 10.5 Z"/></svg>Curare</span></label>
+          <label class="chip"><input type="radio" name="tox" value="bot"><span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 3.4 L3.4 2 L6 4.6 L8.6 2 L10 3.4 L7.4 6 L10 8.6 L8.6 10 L6 7.4 L3.4 10 L2 8.6 L4.6 6 Z"/></svg>Botulinumtoxin</span></label>
+          <label class="chip"><input type="radio" name="tox" value="mus"><span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0.8 L11 4.5 L9.1 10.6 L2.9 10.6 L1 4.5 Z"/></svg>Muscarin</span></label>
+          <label class="chip"><input type="radio" name="tox" value="atr"><span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 1 L8 1 L11 4 L11 8 L8 11 L4 11 L1 8 L1 4 Z"/></svg>Atropin</span></label>
+          <label class="chip"><input type="radio" name="tox" value="sarin"><span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M6 0.8 L11.2 6 L6 11.2 L0.8 6 Z"/></svg>Sarin</span></label>
+        </div>
+        <div class="field">
+          <label for="dose">Dosis <output id="doseOut" for="dose">60 %</output></label>
+          <input type="range" id="dose" min="10" max="100" step="10" value="60" disabled>
+        </div>
+        <div class="tox" id="toxCard">
+          <div class="site" aria-label="Wirkort"><span data-site="pre">Präsynapse</span><span data-site="cleft">Spalt</span><span data-site="post">Postsynapse</span></div>
+          <h3 id="toxName">Kein Gift</h3>
+          <p id="toxText">Normale Erregungsübertragung. Wähle ein Gift, um zu sehen, an welcher Stelle der Übertragung es eingreift.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>Darstellung</h2>
+        <div class="field">
+          <label for="speed">Tempo <output id="speedOut" for="speed">1× · 1 ms ≙ 0,25 s</output></label>
+          <input type="range" id="speed" min="0" max="4" step="1" value="2">
+        </div>
+        <label class="switch"><input type="checkbox" id="labels" checked>Beschriftungen anzeigen</label>
+      </section>
+
+
+      <section hidden>
+        <h2>Zum Ausprobieren</h2>
+        <ul class="tasks">
+          <li><strong>Calcium:</strong> Senke Ca²⁺ auf 0,8 mM. Wie viele Vesikel verschmelzen jetzt, und wird die Schwelle noch erreicht?</li>
+          <li><strong>Summation:</strong> Stelle Ca²⁺ auf 1,2 mM und schalte die Dauerreizung ein. Ab welcher Frequenz entstehen durch zeitliche Summation Aktionspotenziale?</li>
+          <li><strong>Konkurrenz:</strong> Wähle Curare und erhöhe danach Ca²⁺ auf 4 mM. Lässt sich die Hemmung teilweise überwinden?</li>
+          <li><strong>Vergleich:</strong> Sarin und Nikotin greifen an verschiedenen Stellen an. Warum führen beide in hoher Dosis zur Dauerdepolarisation?</li>
+          <li><strong>Rezeptortypen:</strong> Wähle Muscarin oder Atropin. Warum ändert sich an dieser Synapse nichts?</li>
+          <li><strong>Enzym:</strong> Setze die Acetylcholinesterase auf 0 %. Was zeigt das Oszilloskop?</li>
+        </ul>
+      </section>
+    </aside>
+  </main>
+
+  <footer>Didaktisches Modell einer cholinergen Synapse, etwa einer motorischen Endplatte. Mit den Startwerten löst fast jedes präsynaptische Aktionspotenzial ein postsynaptisches aus.</footer>
+</div>
+
+<script>
+/* ===== Simulationsmodell (ohne DOM) ===== */
+const SYN = (function () {
+  'use strict';
+  const rnd = Math.random;
+  function gauss() { let u = 0, v = 0; while (u === 0) u = rnd(); while (v === 0) v = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  const expR = m => -Math.log(1 - rnd()) * m;
+  const clamp = (x, a, b) => (x < a ? a : x > b ? b : x);
+  const smooth = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+
+  const C = {
+    VREST: -70, VTH: -50, EREV: 0, TAUM: 5, GUNIT: 1.0, TAUH: 4, HMID: -56, HMIN: 0.4,
+    ACH_PER_VES: 10, N_DOCK: 6, N_VES: 16, N_ENZ: 8, KH: 3,
+    KIN: 1.45, TAUCA: 1.0, KD: 0.65, RMAX: 2.5, RSPONT: 0.0002,
+    REFILL: 20, DOCK_RATE: 0.5, DOCK_MOVE: 1.2, FUSE_DUR: 0.5, ENDO_DELAY: 1.5, ENDO_DUR: 0.6,
+    AXON: 1.0, REFRACT: 4,
+    BIND_MEAN: { ach: 1.0, nic: 2.0, cur: 8 }, BIND_P: { ach: 1, nic: 0.6, cur: 0.8 },
+    HYDRO: 0.12, PCAP: 0.5, RB: 10, RCAP: 12, NOBIND: 0.3, AGE_KH: 2.0, CUR_N: 34, NIC_N: 22,
+    CROSS: 1.6, TAUV: 0.25,
+    SAMPLE: 0.05, BUF: 1400, DT: 0.02
+  };
+  const DSCALE = { ach: 1, nic: 1, cur: 0.7, sarin: 0.9, mus: 0.9, atr: 0.9, cho: 1.1, ac: 1.3, ca: 1.2, na: 1.2 };
+  const RAD = { ach: 3.2, nic: 3.8, cur: 4.4, sarin: 4.0, mus: 3.8, atr: 3.8, cho: 3.0, ac: 1.8, ca: 2.9, na: 2.7 };
+
+  function apDev(x) {
+    if (x < 0) return 0;
+    if (x < 0.4) return 100 * smooth(x / 0.4);
+    if (x < 1.4) return 100 - 108 * smooth((x - 0.4) / 1.0);
+    return -8 * Math.exp(-(x - 1.4) / 0.8);
+  }
+  function postWave(x, vs) {
+    if (x < 0 || x > 5) return 0;
+    const pk = 30 - vs;
+    if (x < 0.35) return pk * smooth(x / 0.35);
+    if (x < 1.3) { const k = smooth((x - 0.35) / 0.95); return pk * (1 - k) - 10 * k; }
+    return -10 * Math.exp(-(x - 1.3) / 0.7);
+  }
+
+  function geometry(W, H) {
+    const s = clamp(W / 820, 0.55, 1.1);
+    const cx = W / 2, aw = Math.max(40, 0.13 * W);
+    const bx0 = 0.18 * W, bx1 = 0.82 * W, bw = bx1 - bx0;
+    const preY = 0.55 * H, postY = 0.71 * H, cleftH = postY - preY;
+    const rc = 0.06 * H, vr = 12 * s, mem = 8 * s;
+    const D = cleftH * cleftH / (2 * C.CROSS);
+    const blY = postY - 0.42 * cleftH;
+    const dockX = []; for (let i = 0; i < C.N_DOCK; i++) dockX.push(bx0 + 0.16 * bw + i * (0.68 * bw) / (C.N_DOCK - 1));
+    const caX = []; for (let i = 0; i < C.N_DOCK - 1; i++) caX.push((dockX[i] + dockX[i + 1]) / 2);
+    const trX = [bx0 + rc + 10 * s, bx1 - rc - 10 * s];
+    const enzX = []; for (let i = 0; i < C.N_ENZ; i++) enzX.push(bx0 + 0.1 * bw + (i + 0.5) * (0.8 * bw) / C.N_ENZ);
+    const mitos = [
+      { x: cx - 0.17 * W, y: 0.29 * H, rx: 0.075 * W, ry: 0.03 * H, rot: -0.1 },
+      { x: cx + 0.165 * W, y: 0.305 * H, rx: 0.068 * W, ry: 0.028 * H, rot: 0.14 }
+    ];
+    const vreg = { x0: bx0 + vr * 1.8, x1: bx1 - vr * 1.8, y0: 0.385 * H, y1: preY - mem / 2 - vr * 2.6 };
+    if (vreg.y1 < vreg.y0 + vr) vreg.y0 = vreg.y1 - vr;
+    return { W, H, s, cx, aw, bx0, bx1, bw, preY, postY, cleftH, midY: (preY + postY) / 2, rc, vr, mem, D, blY, dockX, caX, trX, enzX, mitos, vreg };
+  }
+
+  function Engine(W, H) {
+    this.p = { caOut: 2.0, nRec: 10, ache: 1.0, freq: 40, train: false, toxin: 'none', dose: 0.6 };
+    this.G = geometry(W, H);
+    this.recs = [];
+    this.reset();
+  }
+  const P = Engine.prototype;
+
+  P.reset = function () {
+    const G = this.G;
+    this.t = 0; this.vpre = C.VREST; this.apStarts = []; this.axonWaves = []; this.lastFire = -1e9;
+    this.caIn = 0; this.vs = C.VREST; this.h = 1; this.postAp = -1e9; this.postApCount = 0; this.preApCount = 0;
+    this.vpost = C.VREST; this.nOpen = 0; this.nextTrain = 0;
+    this.fusedTotal = 0; this.fusedAtAp = 0; this.lastFusion = -1e9; this.evals = []; this.lastResult = null;
+    this.docks = G.dockX.map(x => ({ x, y: 0, ves: null, blocked: false }));
+    this.caCh = G.caX.map(x => ({ x, amt: 0 }));
+    this.enz = G.enzX.map(x => ({ x, y: 0, ax: x, ay: 0, busy: false, busyUntil: -1, blocked: false, ph: rnd() * 6.28 }));
+    this.pores = []; this.parts = []; this.ves = [];
+    this.recs = []; this.buildRecs();
+    const R = G.vreg;
+    for (let i = 0; i < C.N_VES; i++) {
+      this.ves.push({ x: R.x0 + rnd() * (R.x1 - R.x0), y: R.y0 + rnd() * (R.y1 - R.y0), vx: 0, vy: 0, st: 'free', load: 1, dock: null, t0: 0, ph: rnd() * 6.28 });
+    }
+    this.place();
+    for (let i = 0; i < C.N_DOCK; i++) { const v = this.ves[i], d = this.docks[i]; v.st = 'docked'; v.dock = d; d.ves = v; v.x = d.x; v.y = d.y; }
+    const tCa = Math.round(this.p.caOut * 5);
+    for (let i = 0; i < tCa; i++) this.spawn('ca', false);
+    for (let i = 0; i < 14; i++) this.spawn('na', false);
+    this.buf = { t: new Float32Array(C.BUF), pre: new Float32Array(C.BUF), ach: new Float32Array(C.BUF), post: new Float32Array(C.BUF), n: 0, i: 0 };
+    this.nextSample = 0;
+    this.applyToxin();
+  };
+
+  P.place = function () {
+    const G = this.G, s = G.s;
+    for (const d of this.docks) d.y = G.preY - G.mem / 2 - G.vr - 1 * s;
+    const n = this.recs.length;
+    this.recs.forEach((r, i) => {
+      r.x = G.bx0 + 0.1 * G.bw + (i + 0.5) * 0.8 * G.bw / n;
+      r.sp = [{ x: r.x - 7 * s, y: G.postY - 13 * s }, { x: r.x + 7 * s, y: G.postY - 13 * s }];
+    });
+    for (const e of this.enz) { e.ay = G.blY; if (!e.y) { e.x = e.ax; e.y = e.ay; } }
+    for (const po of this.pores) po.x = G.bx0 + G.bw * po.f;
+  };
+
+  P.buildRecs = function () {
+    for (const r of this.recs) for (const q of r.sites) if (q) { q.st = 'free'; q.rec = null; }
+    this.recs = [];
+    for (let i = 0; i < this.p.nRec; i++) this.recs.push({ x: 0, sites: [null, null], sp: null, open: false, amt: 0 });
+    this.place();
+  };
+
+  P.set = function (k, v) {
+    const old = this.p[k];
+    this.p[k] = v;
+    if (k === 'nRec' && v !== old) this.buildRecs();
+    if (k === 'toxin' || k === 'dose') this.applyToxin();
+    if (k === 'train' && v && !old) this.nextTrain = this.t;
+  };
+
+  P.applyToxin = function () {
+    const tox = this.p.toxin, d = this.p.dose;
+    for (const k of this.docks) k.blocked = false;
+    if (tox === 'bot') {
+      const n = Math.round(d * C.N_DOCK);
+      const idx = this.docks.map((_, i) => i).sort(() => rnd() - 0.5);
+      for (let i = 0; i < n; i++) this.docks[idx[i]].blocked = true;
+    }
+    this.pores = [];
+    if (tox === 'latro') {
+      const n = 1 + Math.round(d * 3);
+      for (let i = 0; i < n; i++) this.pores.push({ f: 0.2 + 0.6 * (i + 0.5) / n + 0.04, x: 0 });
+    }
+    for (let i = this.parts.length - 1; i >= 0; i--) {
+      const q = this.parts[i];
+      if ((q.k === 'cur' || q.k === 'nic' || q.k === 'sarin' || q.k === 'mus' || q.k === 'atr') && q.k !== tox) {
+        if (q.st === 'bound' && q.rec) q.rec.sites[q.site] = null;
+        this.parts.splice(i, 1);
+      }
+    }
+    if (tox !== 'sarin') for (const e of this.enz) e.blocked = false;
+    this.place();
+  };
+
+  P.fire = function () {
+    const t = this.t;
+    if (t - this.lastFire < C.REFRACT) return false;
+    this.lastFire = t;
+    this.axonWaves.push(t);
+    this.apStarts.push(t + C.AXON);
+    this.evals.push({ t: t + C.AXON, n: this.postApCount });
+    this.preApCount++;
+    this.fusedAtAp = this.fusedTotal;
+    return true;
+  };
+
+  P.mk = function (k, x, y) {
+    const q = { k, x, y, vx: 0, vy: 0, st: 'free', born: this.t, r: RAD[k] * this.G.s };
+    this.parts.push(q);
+    return q;
+  };
+
+  P.spawn = function (k, edge) {
+    const G = this.G, r = RAD[k] * G.s;
+    const y0 = G.preY + G.mem / 2 + r, y1 = G.postY - G.mem / 2 - r;
+    let x;
+    if (edge) x = rnd() < 0.5 ? 0.03 * G.W : 0.97 * G.W;
+    else x = 0.03 * G.W + rnd() * 0.94 * G.W;
+    const q = this.mk(k, x, y0 + rnd() * (y1 - y0));
+    if (!edge) q.born = this.t - 1;
+    return q;
+  };
+
+  P.fuse = function (v) {
+    const G = this.G, d = v.dock;
+    d.ves = null; v.st = 'fusing'; v.t0 = this.t; v.fx = d.x; v.fy = d.y; v.dock = null;
+    this.fusedTotal++; this.lastFusion = this.t;
+    for (let i = 0; i < C.ACH_PER_VES; i++) {
+      const q = this.mk('ach', d.x + gauss() * G.vr * 0.35, G.preY + G.mem / 2 + 3 * G.s);
+      q.vy = G.cleftH * (1 + rnd() * 0.8);
+      q.vx = gauss() * G.cleftH * 0.8;
+    }
+  };
+
+  P.freeDock = function (x) {
+    let best = null, bd = 1e9;
+    for (const d of this.docks) { if (d.ves) continue; const dd = Math.abs(d.x - x); if (dd < bd) { bd = dd; best = d; } }
+    return best;
+  };
+
+  P.pathTo = function (q, pts, dur) {
+    q.st = 'path'; q.path = pts; q.seg = 0; q.segT = this.t; q.sx = q.x; q.sy = q.y; q.segDur = dur || 0.25;
+  };
+
+  P.caEnter = function (x) {
+    const G = this.G, s = G.s;
+    let best = null, bd = 0.2 * G.W;
+    for (const q of this.parts) { if (q.k !== 'ca' || q.st !== 'free') continue; const dd = Math.abs(q.x - x); if (dd < bd) { bd = dd; best = q; } }
+    if (!best) return;
+    this.pathTo(best, [{ x, y: G.preY + 3 * s }, { x, y: G.preY - 7 * s }, { x: x + gauss() * 6 * s, y: G.preY - 26 * s }], 0.22);
+  };
+
+  P.naEnter = function (r) {
+    const G = this.G, s = G.s;
+    let best = null, bd = 0.15 * G.W;
+    for (const q of this.parts) { if (q.k !== 'na' || q.st !== 'free') continue; const dd = Math.abs(q.x - r.x); if (dd < bd) { bd = dd; best = q; } }
+    if (!best) best = this.mk('na', r.x + gauss() * 10 * s, G.postY - 16 * s);
+    this.pathTo(best, [{ x: r.x, y: G.postY - 12 * s }, { x: r.x, y: G.postY + 8 * s }, { x: r.x + gauss() * 7 * s, y: G.postY + 30 * s }], 0.22);
+  };
+
+  P.step = function (dt) {
+    if (dt <= 0) return;
+    const n = Math.min(80, Math.ceil(dt / C.DT)), h = dt / n;
+    for (let i = 0; i < n; i++) this.sub(h);
+  };
+
+  P.sub = function (dt) {
+    const G = this.G, p = this.p;
+    this.t += dt;
+    const t = this.t;
+    if (p.train) {
+      if (this.nextTrain < t - 50) this.nextTrain = t;
+      if (t >= this.nextTrain) { this.fire(); this.nextTrain += 1000 / p.freq; }
+    }
+    let dev = 0;
+    for (let i = this.apStarts.length - 1; i >= 0; i--) {
+      const tau = t - this.apStarts[i];
+      if (tau > 6) { this.apStarts.splice(i, 1); continue; }
+      dev += apDev(tau);
+    }
+    this.vpre = C.VREST + dev;
+    while (this.axonWaves.length && t - this.axonWaves[0] > C.AXON + 0.3) this.axonWaves.shift();
+
+    const open = this.vpre > -35;
+    let frac = 0;
+    for (const ch of this.caCh) { ch.amt = clamp(ch.amt + (open ? 1 : -1) * dt / 0.15, 0, 1); frac += ch.amt; }
+    frac /= this.caCh.length;
+    const latro = p.toxin === 'latro' ? 0.15 + 0.6 * p.dose : 0;
+    this.caIn += dt * (C.KIN * (p.caOut / 2) * frac + (latro - this.caIn) / C.TAUCA);
+    const c4 = Math.pow(Math.max(0, this.caIn), 4), hill = c4 / (c4 + Math.pow(C.KD, 4));
+    const haz = C.RMAX * hill + C.RSPONT;
+    for (const d of this.docks) { const v = d.ves; if (v && v.st === 'docked' && !d.blocked && rnd() < haz * dt) this.fuse(v); }
+    for (const ch of this.caCh) if (ch.amt > 0.5 && p.caOut > 0 && rnd() < 3.5 * dt * Math.min(1, p.caOut / 2)) this.caEnter(ch.x);
+    for (const po of this.pores) if (rnd() < (0.6 + 1.6 * p.dose) * dt) this.caEnter(po.x);
+
+    this.updVes(dt);
+    this.updEnz(dt);
+    this.updRecs(dt);
+    this.updParts(dt);
+    this.maintain(dt);
+
+    let nOpen = 0;
+    for (const r of this.recs) if (r.open) nOpen++;
+    this.nOpen = nOpen;
+    this.vs += dt * (-(this.vs - C.VREST) - C.GUNIT * nOpen * (this.vs - C.EREV)) / C.TAUM;
+    const hinf = 1 / (1 + Math.exp((this.vs - C.HMID) / 3));
+    this.h += dt * (hinf - this.h) / C.TAUH;
+    if (t - this.postAp > 2.5 && this.vs >= C.VTH && this.h > C.HMIN) { this.postAp = t; this.h = 0; this.postApCount++; }
+    this.vpost = this.vs + postWave(t - this.postAp, this.vs);
+
+    while (this.evals.length && t > this.evals[0].t + 10) {
+      const e = this.evals.shift();
+      this.lastResult = { ok: this.postApCount > e.n, t };
+    }
+    if (t >= this.nextSample) { this.sample(); this.nextSample = t + C.SAMPLE; }
+  };
+
+  P.updVes = function (dt) {
+    const G = this.G, t = this.t, p = this.p, R = G.vreg, vr = G.vr;
+    const Dv = 0.08 * vr * vr, tv = 1.0, sig = Math.sqrt(2 * Dv) / tv, sq = Math.sqrt(dt);
+    for (let i = this.ves.length - 1; i >= 0; i--) {
+      const v = this.ves[i];
+      if (v.st === 'free') {
+        v.vx += (-v.vx / tv) * dt + sig * sq * gauss();
+        v.vy += (-v.vy / tv) * dt + sig * sq * gauss();
+        v.x += v.vx * dt; v.y += v.vy * dt;
+        if (v.x < R.x0) { v.x = R.x0; v.vx = Math.abs(v.vx); }
+        if (v.x > R.x1) { v.x = R.x1; v.vx = -Math.abs(v.vx); }
+        if (v.y < R.y0) { v.y = R.y0; v.vy = Math.abs(v.vy); }
+        if (v.y > R.y1) { v.y = R.y1; v.vy = -Math.abs(v.vy); }
+        if (v.load < 1) v.load = Math.min(1, v.load + dt / C.REFILL);
+        else if (rnd() < C.DOCK_RATE * dt) {
+          const d = this.freeDock(v.x);
+          if (d) { d.ves = v; v.dock = d; v.st = 'move'; v.t0 = t; v.sx = v.x; v.sy = v.y; }
+        }
+      } else if (v.st === 'move') {
+        const k = (t - v.t0) / C.DOCK_MOVE, e = smooth(k);
+        v.x = v.sx + (v.dock.x - v.sx) * e; v.y = v.sy + (v.dock.y - v.sy) * e;
+        if (k >= 1) { v.st = 'docked'; v.x = v.dock.x; v.y = v.dock.y; }
+      } else if (v.st === 'docked') {
+        v.x = v.dock.x; v.y = v.dock.y;
+      } else if (v.st === 'fusing') {
+        if (t - v.t0 >= C.FUSE_DUR) { v.st = 'gone'; v.t0 = t; }
+      } else if (v.st === 'gone') {
+        if (t - v.t0 >= C.ENDO_DELAY) {
+          if (p.toxin === 'latro' && rnd() < p.dose * 0.7) { this.ves.splice(i, 1); continue; }
+          const side = rnd() < 0.5 ? -1 : 1;
+          v.x = clamp(v.fx + side * (1.6 + rnd()) * vr, R.x0, R.x1);
+          v.sy = G.preY - G.mem / 2 - vr * 1.15; v.y = v.sy;
+          v.load = 0; v.st = 'endo'; v.t0 = t; v.vx = 0; v.vy = 0;
+        }
+      } else if (v.st === 'endo') {
+        const k = (t - v.t0) / C.ENDO_DUR;
+        v.y = v.sy + (R.y1 - v.sy) * smooth(k);
+        if (k >= 1) { v.st = 'free'; v.y = R.y1; v.vy = -vr * 0.5; }
+      }
+    }
+    // gegenseitige Abstoßung freier Vesikel
+    const n = this.ves.length, min = 2.2 * vr, min2 = min * min;
+    for (let i = 0; i < n; i++) {
+      const a = this.ves[i];
+      if (a.st === 'gone' || a.st === 'fusing') continue;
+      for (let j = i + 1; j < n; j++) {
+        const b = this.ves[j];
+        if (b.st === 'gone' || b.st === 'fusing') continue;
+        const af = a.st === 'free', bf = b.st === 'free';
+        if (!af && !bf) continue;
+        const dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+        if (d2 < min2 && d2 > 1e-6) {
+          const d = Math.sqrt(d2), o = (min - d) * 0.25, ux = dx / d, uy = dy / d;
+          if (af) { a.x -= ux * o * (bf ? 1 : 2); a.y -= uy * o * (bf ? 1 : 2); }
+          if (bf) { b.x += ux * o * (af ? 1 : 2); b.y += uy * o * (af ? 1 : 2); }
+        }
+      }
+    }
+    if (p.toxin !== 'latro' && this.ves.length < C.N_VES && rnd() < 0.04 * dt) {
+      this.ves.push({ x: R.x0 + rnd() * (R.x1 - R.x0), y: R.y0, vx: 0, vy: 0, st: 'free', load: 0, dock: null, t0: t, ph: rnd() * 6.28, born: t });
+    }
+  };
+
+  P.updEnz = function (dt) {
+    const G = this.G, t = this.t, s = G.s;
+    for (const e of this.enz) {
+      e.ph += dt * 2.2;
+      e.x = e.ax + Math.sin(e.ph) * 1.4 * s;
+      e.y = e.ay + Math.cos(e.ph * 1.3) * 1.0 * s;
+      if (e.busy && t >= e.busyUntil) {
+        e.busy = false;
+        const a = this.mk('cho', e.x - 3 * s, e.y - 4 * s); a.life = 9; a.vy = -G.cleftH * 0.8; a.vx = gauss() * G.cleftH * 0.6;
+        const b = this.mk('ac', e.x + 3 * s, e.y - 4 * s); b.life = 3; b.vy = -G.cleftH * 0.5; b.vx = gauss() * G.cleftH * 0.6;
+      }
+    }
+  };
+
+  P.updRecs = function (dt) {
+    for (const r of this.recs) {
+      const a = r.sites[0], b = r.sites[1];
+      const ag = q => q && (q.k === 'ach' || q.k === 'nic');
+      const cur = (a && a.k === 'cur') || (b && b.k === 'cur');
+      r.open = ag(a) && ag(b) && !cur;
+      r.amt = clamp(r.amt + (r.open ? 1 : -1) * dt / 0.12, 0, 1);
+      if (r.open && rnd() < 3.5 * dt) this.naEnter(r);
+    }
+  };
+
+  P.updParts = function (dt) {
+    const G = this.G, t = this.t, s = G.s, sq = Math.sqrt(dt), tau = C.TAUV;
+    const yTop = G.preY + G.mem / 2, yBot = G.postY - G.mem / 2 - 2 * s;
+    const xL = 0.025 * G.W, xR = 0.975 * G.W, eL = G.bx0 - 0.03 * G.W, eR = G.bx1 + 0.03 * G.W;
+    const rb = C.RB * s, rb2 = rb * rb, rcap = C.RCAP * s, rcap2 = rcap * rcap;
+    const pcap = Math.min(1, C.PCAP * this.p.ache), kh = C.KH * this.p.ache;
+    for (let i = this.parts.length - 1; i >= 0; i--) {
+      const q = this.parts[i];
+      if (q.st === 'fade' && t - q.fadeT > 0.5) { this.parts.splice(i, 1); continue; }
+      if (q.st === 'free' || (q.st === 'fade' && !q.frozen)) {
+        const D = G.D * DSCALE[q.k], sig = Math.sqrt(2 * D) / tau;
+        q.vx += (-q.vx / tau) * dt + sig * sq * gauss();
+        q.vy += (-q.vy / tau) * dt + sig * sq * gauss();
+        q.x += q.vx * dt; q.y += q.vy * dt;
+        const lo = yTop + q.r, hi = yBot - q.r;
+        if (q.y < lo) { q.y = Math.min(hi, 2 * lo - q.y); q.vy = Math.abs(q.vy); }
+        if (q.y > hi) { q.y = Math.max(lo, 2 * hi - q.y); q.vy = -Math.abs(q.vy); }
+        if (q.k === 'ach' || q.k === 'cho' || q.k === 'ac') {
+          if ((q.x < eL || q.x > eR) && q.st !== 'fade') { q.st = 'fade'; q.fadeT = t; }
+        } else {
+          if (q.x < xL) { q.x = xL; q.vx = Math.abs(q.vx); }
+          if (q.x > xR) { q.x = xR; q.vx = -Math.abs(q.vx); }
+        }
+        if (q.st !== 'free') continue;
+        if (q.life && t - q.born > q.life) { q.st = 'fade'; q.fadeT = t; continue; }
+        // dichte AChE im Spalt: ACh wird vom nächsten freien Enzym eingefangen
+        if (q.k === 'ach' && kh > 0 && (q.wasBound || t - q.born > C.AGE_KH) && rnd() < kh * dt) {
+          let best = null, bd = 0.22 * G.W;
+          for (const e of this.enz) { if (e.blocked || e.busy) continue; const dd = Math.abs(e.x - q.x); if (dd < bd) { bd = dd; best = e; } }
+          if (best) { best.busy = true; best.busyUntil = Infinity; q.toEnz = best; this.pathTo(q, [{ x: best.x, y: best.y - 3 * s }], 0.14); continue; }
+        }
+        // Bindung an Rezeptoren
+        if ((q.k === 'ach' || q.k === 'nic' || q.k === 'cur') && q.y > G.postY - 24 * s && !(q.noBind > t)) {
+          for (const r of this.recs) {
+            if (Math.abs(r.x - q.x) > 14 * s) continue;
+            for (let j = 0; j < 2; j++) {
+              if (r.sites[j]) continue;
+              const sp = r.sp[j], dx = sp.x - q.x, dy = sp.y - q.y;
+              if (dx * dx + dy * dy < rb2 && rnd() < C.BIND_P[q.k]) {
+                r.sites[j] = q; q.st = 'bound'; q.rec = r; q.site = j; q.wasBound = true; q.tOff = t + expR(C.BIND_MEAN[q.k]);
+                q.x = sp.x; q.y = sp.y; break;
+              }
+            }
+            if (q.st === 'bound') break;
+          }
+          if (q.st !== 'free') continue;
+        }
+        // Acetylcholinesterase und E605
+        if ((q.k === 'ach' || q.k === 'sarin') && Math.abs(q.y - G.blY) < rcap) {
+          let gone = false;
+          for (const e of this.enz) {
+            if (e.blocked || (q.k === 'ach' && (e.busy || !(q.wasBound || t - q.born > C.AGE_KH)))) continue;
+            const dx = e.x - q.x, dy = e.y - q.y;
+            if (dx * dx + dy * dy < rcap2) {
+              if (q.k === 'ach') {
+                if (rnd() < pcap) { e.busy = true; e.busyUntil = t + C.HYDRO; this.parts.splice(i, 1); gone = true; }
+              } else { e.blocked = true; q.st = 'inh'; q.en = e; }
+              break;
+            }
+          }
+          if (gone) continue;
+        }
+        // Cholin-Wiederaufnahme
+        if (q.k === 'cho' && q.y < yTop + 9 * s) {
+          for (const x of G.trX) {
+            if (Math.abs(q.x - x) < 10 * s) {
+              this.pathTo(q, [{ x, y: G.preY }, { x: x + gauss() * 4 * s, y: G.preY - 22 * s }], 0.25);
+              q.uptake = true; break;
+            }
+          }
+        }
+      } else if (q.st === 'bound') {
+        const sp = q.rec ? q.rec.sp[q.site] : null;
+        if (sp) { q.x = sp.x; q.y = sp.y; }
+        if (!q.rec || t >= q.tOff) {
+          if (q.rec) q.rec.sites[q.site] = null;
+          q.rec = null; q.st = 'free'; q.y -= 3 * s; q.noBind = t + C.NOBIND;
+          q.vy = -G.cleftH * (0.5 + rnd()); q.vx = gauss() * G.cleftH * 0.5;
+        }
+      } else if (q.st === 'inh') {
+        q.x = q.en.x; q.y = q.en.y - 5 * s;
+      } else if (q.st === 'path') {
+        const k = (t - q.segT) / q.segDur, w = q.path[q.seg], e = smooth(k);
+        q.x = q.sx + (w.x - q.sx) * e; q.y = q.sy + (w.y - q.sy) * e;
+        if (k >= 1) {
+          q.seg++; q.sx = w.x; q.sy = w.y; q.segT = t;
+          if (q.seg >= q.path.length) {
+            if (q.toEnz) { const e = q.toEnz; e.busyUntil = t + C.HYDRO; this.parts.splice(i, 1); continue; }
+            q.st = 'fade'; q.fadeT = t; q.frozen = true; q.vx = 0; q.vy = 0;
+          }
+        }
+      }
+    }
+  };
+
+  P.maintain = function (dt) {
+    const p = this.p, tox = p.toxin;
+    const cnt = { ca: 0, na: 0, cur: 0, nic: 0, sarin: 0, mus: 0, atr: 0 };
+    for (const q of this.parts) {
+      if (!(q.k in cnt)) continue;
+      if (q.k === 'ca' || q.k === 'na') { if (q.st === 'free') cnt[q.k]++; }
+      else if (q.st !== 'fade') cnt[q.k]++;
+    }
+    const tgt = {
+      ca: Math.round(p.caOut * 5), na: 14,
+      cur: tox === 'cur' ? Math.round(p.dose * C.CUR_N) : 0,
+      nic: tox === 'nic' ? Math.round(p.dose * C.NIC_N) : 0,
+      sarin: tox === 'sarin' ? Math.round(p.dose * C.N_ENZ) : 0,
+      mus: tox === 'mus' ? Math.round(p.dose * C.NIC_N) : 0,
+      atr: tox === 'atr' ? Math.round(p.dose * C.NIC_N) : 0
+    };
+    for (const k in cnt) {
+      if (cnt[k] < tgt[k]) {
+        if (rnd() < (k === 'ca' || k === 'na' ? 5 : 6) * dt) this.spawn(k, true);
+      } else if (cnt[k] > tgt[k]) {
+        for (let i = this.parts.length - 1; i >= 0; i--) {
+          const q = this.parts[i];
+          if (q.k === k && q.st === 'free') { q.st = 'fade'; q.fadeT = this.t; break; }
+        }
+      }
+    }
+  };
+
+  P.achCount = function () {
+    let n = 0;
+    for (const q of this.parts) if (q.k === 'ach' && (q.st === 'free' || q.st === 'bound')) n++;
+    return n;
+  };
+
+  P.sample = function () {
+    const b = this.buf, i = b.i;
+    b.t[i] = this.t; b.pre[i] = this.vpre; b.post[i] = this.vpost; b.ach[i] = this.achCount();
+    b.i = (i + 1) % C.BUF; b.n = Math.min(b.n + 1, C.BUF);
+  };
+
+  P.resize = function (W, H) {
+    const o = this.G, n = geometry(W, H);
+    this.G = n;
+    if (!o || (o.W === W && o.H === H)) { this.place(); return; }
+    const mx = x => x * n.W / o.W;
+    const my = y => (y <= o.preY ? y * n.preY / o.preY
+      : y <= o.postY ? n.preY + (y - o.preY) * (n.cleftH / o.cleftH)
+        : n.postY + (y - o.postY) * ((n.H - n.postY) / (o.H - o.postY)));
+    const vs = n.cleftH / o.cleftH;
+    for (const v of this.ves) {
+      v.x = mx(v.x); v.y = my(v.y); v.vx *= vs; v.vy *= vs;
+      if (v.sx != null) { v.sx = mx(v.sx); v.sy = my(v.sy); }
+      if (v.fx != null) { v.fx = mx(v.fx); v.fy = my(v.fy); }
+    }
+    for (const q of this.parts) {
+      q.x = mx(q.x); q.y = my(q.y); q.vx *= vs; q.vy *= vs; q.r = RAD[q.k] * n.s;
+      if (q.sx != null) { q.sx = mx(q.sx); q.sy = my(q.sy); }
+      if (q.path) q.path = q.path.map(w => ({ x: mx(w.x), y: my(w.y) }));
+    }
+    this.docks.forEach((d, i) => { d.x = n.dockX[i]; });
+    this.caCh.forEach((c, i) => { c.x = n.caX[i]; });
+    this.enz.forEach((e, i) => { e.ax = n.enzX[i]; e.ay = n.blY; e.x = e.ax; e.y = e.ay; });
+    this.place();
+  };
+
+  P.readyCount = function () {
+    let docked = 0, loaded = 0;
+    for (const v of this.ves) {
+      if (v.st === 'docked') docked++;
+      if ((v.st === 'free' && v.load >= 1) || v.st === 'move' || v.st === 'docked') loaded++;
+    }
+    return { docked, loaded, total: this.ves.filter(v => v.st !== 'gone' && v.st !== 'fusing').length };
+  };
+
+  return { Engine, C, RAD, geometry, smooth, clamp };
+})();
+
+</script>
+<script>
+/* ===== Darstellung und Bedienung ===== */
+(function () {
+  'use strict';
+  const { Engine, C, smooth, clamp } = SYN;
+  const $ = id => document.getElementById(id);
+  const root = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const T = {};
+  const TOK = ['bg', 'panel', 'ink', 'muted', 'rule', 'accent', 'ca', 'na', 'ach', 'ache', 'toxin', 'extra', 'pre', 'post', 'mem', 'mem-core', 'protein', 'mito', 'mito-line', 'vesicle', 'label', 'halo', 'scope-bg', 'scope-grid', 'scope-text', 'tr-pre', 'tr-ach', 'tr-post', 'tr-th'];
+  function readTokens() { const cs = getComputedStyle(root); for (const k of TOK) T[k] = cs.getPropertyValue('--' + k).trim(); }
+  function hexA(h, a) {
+    if (!h || h[0] !== '#') return h;
+    const f = h.length === 4 ? h.slice(1).split('').map(x => x + x).join('') : h.slice(1, 7);
+    return `rgba(${parseInt(f.slice(0, 2), 16)},${parseInt(f.slice(2, 4), 16)},${parseInt(f.slice(4, 6), 16)},${a})`;
+  }
+  const de = (x, d) => x.toFixed(d).replace('.', ',');
+  const mv = v => (v < -0.5 ? '−' : '') + Math.abs(Math.round(v));
+
+  const sim = $('sim'), ctx = sim.getContext('2d'), wrap = $('simWrap');
+  const bg = document.createElement('canvas'), bctx = bg.getContext('2d');
+  const scope = $('scope'), sctx = scope.getContext('2d'), swrap = $('scopeWrap');
+  let E = null, W = 0, H = 0, dpr = 1, SW = 0, SH = 0;
+  let running = true, labels = true;
+  const SPEEDS = [0.25, 0.5, 1, 2, 4], BASE = 4; // ms Simulationszeit je Sekunde bei 1×
+  let speedIdx = reduce ? 1 : 2;
+
+  readTokens();
+
+  /* ---------- Größe ---------- */
+  function simHeight(w) { return Math.round(w >= 700 ? w * 0.62 : w >= 480 ? w * 0.78 : w * 0.98); }
+  function sizeSim() {
+    const w = Math.max(280, Math.round(wrap.clientWidth)), h = simHeight(w);
+    const nd = Math.min(2, window.devicePixelRatio || 1);
+    if (w === W && h === H && nd === dpr && E) return;
+    W = w; H = h; dpr = nd;
+    sim.width = Math.round(w * dpr); sim.height = Math.round(h * dpr); sim.style.height = h + 'px';
+    bg.width = sim.width; bg.height = sim.height;
+    if (!E) E = new Engine(w, h); else E.resize(w, h);
+    drawStatic();
+  }
+  function sizeScope() {
+    const w = Math.max(280, Math.round(swrap.clientWidth)), h = w < 520 ? 230 : 250;
+    if (w === SW && h === SH && scope.width === Math.round(w * dpr)) return;
+    SW = w; SH = h;
+    scope.width = Math.round(w * dpr); scope.height = Math.round(h * dpr); scope.style.height = h + 'px';
+  }
+
+  /* ---------- Statischer Hintergrund ---------- */
+  function bulbPath(c, G) {
+    const { cx, aw, bx0, bx1, preY, rc, H } = G, a0 = cx - aw / 2, a1 = cx + aw / 2;
+    c.beginPath();
+    c.moveTo(a0, -12); c.lineTo(a0, 0.1 * H);
+    c.bezierCurveTo(a0, 0.2 * H, bx0, 0.17 * H, bx0, 0.3 * H);
+    c.lineTo(bx0, preY - rc); c.quadraticCurveTo(bx0, preY, bx0 + rc, preY);
+    c.lineTo(bx1 - rc, preY); c.quadraticCurveTo(bx1, preY, bx1, preY - rc);
+    c.lineTo(bx1, 0.3 * H); c.bezierCurveTo(bx1, 0.17 * H, a1, 0.2 * H, a1, 0.1 * H);
+    c.lineTo(a1, -12);
+  }
+  function membrane(c, s) {
+    c.lineJoin = 'round'; c.lineCap = 'round';
+    c.lineWidth = 8 * s; c.strokeStyle = T.mem; c.stroke();
+    c.lineWidth = 3.2 * s; c.strokeStyle = T['mem-core']; c.stroke();
+  }
+  function drawStatic() {
+    const G = E.G, s = G.s, c = bctx;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.fillStyle = T.extra; c.fillRect(0, 0, W, H);
+    c.fillStyle = T.post; c.fillRect(0, G.postY, W, H - G.postY);
+    c.beginPath(); c.moveTo(-12, G.postY); c.lineTo(W + 12, G.postY); membrane(c, s);
+    // Basallamina
+    c.save(); c.setLineDash([3 * s, 5 * s]); c.lineWidth = 1.2 * s; c.strokeStyle = T['mito-line']; c.globalAlpha = 0.45;
+    c.beginPath(); c.moveTo(G.bx0 + G.rc, G.blY); c.lineTo(G.bx1 - G.rc, G.blY); c.stroke(); c.restore();
+    // Endknöpfchen
+    bulbPath(c, G); c.closePath(); c.fillStyle = T.pre; c.fill();
+    bulbPath(c, G); membrane(c, s);
+    // Mikrotubuli
+    c.save(); c.globalAlpha = 0.35; c.strokeStyle = T['mito-line']; c.lineWidth = 1.3 * s;
+    for (const f of [-0.2, 0.18]) {
+      const x = G.cx + f * G.aw;
+      c.beginPath(); c.moveTo(x, 0); c.bezierCurveTo(x, 0.12 * G.H, x + f * 40 * s, 0.17 * G.H, x + f * 80 * s, 0.22 * G.H); c.stroke();
+    }
+    c.restore();
+    // Mitochondrien
+    for (const m of G.mitos) {
+      c.save(); c.translate(m.x, m.y); c.rotate(m.rot);
+      c.beginPath(); c.ellipse(0, 0, m.rx, m.ry, 0, 0, Math.PI * 2);
+      c.fillStyle = T.mito; c.fill(); c.lineWidth = 2 * s; c.strokeStyle = T['mito-line']; c.stroke();
+      c.clip(); c.beginPath();
+      const n = 7;
+      for (let i = 0; i < n; i++) {
+        const x = -m.rx + (i + 0.6) * (2 * m.rx / n), up = i % 2 === 0;
+        c.moveTo(x, up ? -m.ry : m.ry); c.lineTo(x, up ? m.ry * 0.3 : -m.ry * 0.3);
+      }
+      c.lineWidth = 1.6 * s; c.stroke(); c.restore();
+    }
+  }
+
+  /* ---------- Zeichenhelfer ---------- */
+  function rr(c, x, y, w, h, r) {
+    c.beginPath(); c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); c.fill();
+  }
+  function poly(c, x, y, r, n, rot) {
+    c.beginPath();
+    for (let i = 0; i < n; i++) { const a = rot + i * 2 * Math.PI / n; const px = x + r * Math.cos(a), py = y + r * Math.sin(a); if (i) c.lineTo(px, py); else c.moveTo(px, py); }
+    c.closePath(); c.fill();
+  }
+  const DOTS = [[0, 0], [0.48, 0.1], [-0.44, 0.18], [0.12, -0.46], [-0.26, -0.38], [0.3, 0.46], [-0.12, 0.5]];
+
+  function drawParticle(c, q, s) {
+    const r = q.r;
+    switch (q.k) {
+      case 'ach': c.fillStyle = T.ach; c.beginPath(); c.arc(q.x, q.y, r, 0, 6.2832); c.fill(); break;
+      case 'nic': c.fillStyle = T.toxin; poly(c, q.x, q.y, r, 6, 0); break;
+      case 'cur': c.fillStyle = T.toxin; poly(c, q.x, q.y, r, 3, -Math.PI / 2); break;
+      case 'sarin': c.fillStyle = T.toxin; poly(c, q.x, q.y, r, 4, 0); break;
+      case 'mus': c.fillStyle = T.toxin; poly(c, q.x, q.y, r, 5, -Math.PI / 2); break;
+      case 'atr': c.fillStyle = T.toxin; poly(c, q.x, q.y, r, 8, Math.PI / 8); break;
+      case 'cho': c.strokeStyle = T.ach; c.lineWidth = 1.5 * s; c.fillStyle = T.extra; c.beginPath(); c.arc(q.x, q.y, r, 0, 6.2832); c.fill(); c.stroke(); break;
+      case 'ac': c.fillStyle = T.muted; c.beginPath(); c.arc(q.x, q.y, r, 0, 6.2832); c.fill(); break;
+      case 'ca': c.fillStyle = T.ca; c.beginPath(); c.arc(q.x, q.y, r, 0, 6.2832); c.fill(); break;
+      case 'na': c.fillStyle = T.na; c.beginPath(); c.arc(q.x, q.y, r, 0, 6.2832); c.fill(); break;
+    }
+  }
+
+  /* ---------- Bild ---------- */
+  function draw() {
+    const G = E.G, s = G.s, t = E.t, c = ctx;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.drawImage(bg, 0, 0);
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // EPSP: Tönung der Postsynapse
+    const dep = clamp((E.vs + 70) / 45, 0, 1);
+    if (dep > 0.02) {
+      const g = c.createLinearGradient(0, G.postY, 0, G.postY + 0.45 * (H - G.postY));
+      g.addColorStop(0, hexA(T.na, 0.42 * dep)); g.addColorStop(1, hexA(T.na, 0));
+      c.fillStyle = g; c.fillRect(0, G.postY + 4 * s, W, 0.45 * (H - G.postY));
+    }
+
+    // Aktionspotenzial läuft das Axon hinunter
+    for (const w of E.axonWaves) {
+      const k = (t - w) / C.AXON; if (k < 0) continue;
+      const a = k <= 1 ? 1 : Math.max(0, 1 - (k - 1) / 0.3), y = Math.min(1, k) * 0.4 * G.H;
+      c.save(); bulbPath(c, G); c.closePath(); c.clip();
+      const g = c.createLinearGradient(0, y - 34 * s, 0, y + 34 * s);
+      g.addColorStop(0, hexA(T.accent, 0)); g.addColorStop(0.5, hexA(T.accent, 0.38 * a)); g.addColorStop(1, hexA(T.accent, 0));
+      c.fillStyle = g; c.fillRect(0, y - 34 * s, W, 68 * s); c.restore();
+    }
+    const pd = clamp((E.vpre + 50) / 80, 0, 1);
+    if (pd > 0.02) {
+      c.save(); bulbPath(c, G); c.lineWidth = 13 * s; c.lineJoin = 'round'; c.strokeStyle = hexA(T.accent, 0.45 * pd); c.stroke(); c.restore();
+    }
+
+    // Ca²⁺-Kanäle
+    for (const ch of E.caCh) {
+      const off = 3 * s + ch.amt * 1.8 * s, w = 5 * s, h = 14 * s, y = G.preY;
+      if (ch.amt > 0.05) { c.fillStyle = hexA(T.ca, 0.45 * ch.amt); c.beginPath(); c.arc(ch.x, y, 12 * s, 0, 6.2832); c.fill(); }
+      c.fillStyle = T.protein; rr(c, ch.x - off - w, y - h / 2, w, h, 2 * s); rr(c, ch.x + off, y - h / 2, w, h, 2 * s);
+    }
+    // Cholin-Transporter
+    for (const x of G.trX) {
+      c.fillStyle = T.protein; rr(c, x - 6 * s, G.preY - 7.5 * s, 12 * s, 15 * s, 3 * s);
+      c.strokeStyle = T.ach; c.lineWidth = 1.6 * s; c.beginPath();
+      c.moveTo(x - 3 * s, G.preY + 1.5 * s); c.lineTo(x, G.preY - 2.5 * s); c.lineTo(x + 3 * s, G.preY + 1.5 * s); c.stroke();
+    }
+    // Poren durch α-Latrotoxin
+    for (const po of E.pores) {
+      c.fillStyle = T.toxin; c.beginPath(); c.arc(po.x, G.preY, 6.5 * s, 0, 6.2832); c.fill();
+      c.fillStyle = T.extra; c.beginPath(); c.arc(po.x, G.preY, 2.6 * s, 0, 6.2832); c.fill();
+    }
+    // Rezeptoren
+    for (const r of E.recs) {
+      const off = 4 * s + r.amt * 2 * s, w = 6 * s, h = 24 * s, y = G.postY;
+      if (r.amt > 0.05) { c.fillStyle = hexA(T.na, 0.42 * r.amt); c.beginPath(); c.arc(r.x, y, 16 * s, 0, 6.2832); c.fill(); }
+      c.fillStyle = T.protein; rr(c, r.x - off - w, y - h / 2, w, h, 2.5 * s); rr(c, r.x + off, y - h / 2, w, h, 2.5 * s);
+      c.fillStyle = T.extra;
+      for (const sp of r.sp) { c.beginPath(); c.arc(sp.x, sp.y + 1.2 * s, 3.4 * s, 0, 6.2832); c.fill(); }
+    }
+    // Vesikel
+    for (const v of E.ves) {
+      let x = v.x, y = v.y, r = G.vr, a = 1, gap = 0, dots = Math.round(v.load * DOTS.length);
+      if (v.st === 'gone') continue;
+      if (v.st === 'fusing') {
+        const k = clamp((t - v.t0) / C.FUSE_DUR, 0, 1);
+        x = v.fx; y = v.fy + k * G.vr * 0.9; r = G.vr * (1 - 0.5 * k); a = 1 - 0.5 * k; gap = k * Math.PI * 0.85; dots = 0;
+      } else if (v.st === 'endo') {
+        const k = clamp((t - v.t0) / C.ENDO_DUR, 0, 1);
+        r = G.vr * (0.45 + 0.55 * smooth(k)); a = 0.4 + 0.6 * k;
+      }
+      if (v.born != null) a *= clamp((t - v.born) / 1.5, 0, 1);
+      c.globalAlpha = a;
+      c.beginPath();
+      if (gap > 0) c.arc(x, y, r, Math.PI / 2 + gap, Math.PI / 2 - gap + 2 * Math.PI);
+      else c.arc(x, y, r, 0, 6.2832);
+      c.fillStyle = T.vesicle; c.fill(); c.lineWidth = 2.4 * s; c.strokeStyle = T.mem; c.stroke();
+      if (dots) {
+        c.fillStyle = T.ach;
+        for (let i = 0; i < dots; i++) { c.beginPath(); c.arc(x + DOTS[i][0] * r, y + DOTS[i][1] * r, 1.8 * s, 0, 6.2832); c.fill(); }
+      }
+      c.globalAlpha = 1;
+    }
+    // durch Botulinumtoxin blockierte Andockstellen
+    for (const d of E.docks) {
+      if (!d.blocked) continue;
+      const x = d.x + G.vr * 0.95, y = G.preY - G.mem / 2 - 3.5 * s, k = 3.2 * s;
+      c.strokeStyle = T.toxin; c.lineWidth = 2.2 * s; c.lineCap = 'round';
+      c.beginPath(); c.moveTo(x - k, y - k); c.lineTo(x + k, y + k); c.moveTo(x + k, y - k); c.lineTo(x - k, y + k); c.stroke();
+    }
+    // Acetylcholinesterase
+    for (const e of E.enz) {
+      const r = 7.5 * s, m = e.blocked ? 0.3 : e.busy ? 0.12 : 0.55;
+      c.fillStyle = e.blocked ? hexA(T.muted, 0.75) : T.ache;
+      c.beginPath(); c.moveTo(e.x, e.y); c.arc(e.x, e.y, r, -Math.PI / 2 + m, -Math.PI / 2 - m + 2 * Math.PI); c.closePath(); c.fill();
+      if (e.busy && e.busyUntil !== Infinity) { c.fillStyle = T.ach; c.beginPath(); c.arc(e.x, e.y - 2 * s, 2.4 * s, 0, 6.2832); c.fill(); }
+    }
+    // Teilchen
+    for (const q of E.parts) {
+      let a = clamp((t - q.born) / 0.3, 0, 1);
+      if (q.st === 'fade') a *= clamp(1 - (t - q.fadeT) / 0.5, 0, 1);
+      if (a <= 0.01) continue;
+      c.globalAlpha = a; drawParticle(c, q, s);
+    }
+    c.globalAlpha = 1;
+    // Aktionspotenzial der Postsynapse
+    const pa = t - E.postAp;
+    if (pa >= 0 && pa < 3.5) {
+      const k = pa / 3.5, d = k * W * 0.62, a = 1 - k, len = 70 * s;
+      c.save(); c.lineCap = 'round'; c.lineWidth = 11 * s; c.strokeStyle = hexA(T.na, 0.7 * a);
+      c.beginPath(); c.moveTo(G.cx - d - len / 2, G.postY); c.lineTo(G.cx - d + len / 2, G.postY);
+      c.moveTo(G.cx + d - len / 2, G.postY); c.lineTo(G.cx + d + len / 2, G.postY); c.stroke();
+      c.font = `700 ${W < 560 ? 11 : 13}px system-ui, -apple-system, sans-serif`; c.textAlign = 'center'; c.textBaseline = 'middle';
+      c.fillStyle = hexA(T.na, Math.min(1, a * 1.6));
+      c.fillText('postsynaptisches Aktionspotenzial', G.cx, G.postY + 0.62 * (H - G.postY));
+      c.restore();
+    }
+    if (labels) drawLabels(c, G, s);
+  }
+
+  /* ---------- Beschriftungen ---------- */
+  function drawLabels(c, G, s) {
+    const narrow = W < 560, fs = narrow ? 9.5 : 12, lh = fs * 1.22;
+    c.save();
+    c.font = `${fs}px system-ui, -apple-system, sans-serif`; c.textBaseline = 'middle';
+    const Lx = G.bx0 - 10, Rx = G.bx1 + 10;
+    const m = G.mitos[1], lastDock = E.docks[E.docks.length - 1], lastEnz = E.enz[E.enz.length - 1], lastRec = E.recs[E.recs.length - 1];
+    const items = [
+      { t: narrow ? 'End-\nknöpfchen' : 'Endknöpfchen\n(Präsynapse)', side: 'L', ty: 0.3 * G.H, ax: G.bx0 + 4 * s, ay: 0.36 * G.H },
+      { t: narrow ? 'Ca²⁺-\nKanal' : 'spannungs-\ngesteuerter\nCa²⁺-Kanal', side: 'L', ty: G.preY - 0.075 * G.H, ax: E.caCh[0].x - 6 * s, ay: G.preY - 3 * s },
+      { t: narrow ? 'Spalt' : 'synaptischer\nSpalt', side: 'L', ty: G.midY, ax: G.bx0 + G.rc * 0.6, ay: G.midY },
+      { t: 'Axon', side: 'R', tx: G.cx + G.aw / 2 + 12 * s, ty: 0.055 * G.H, ax: G.cx + G.aw / 2 + 2 * s, ay: 0.055 * G.H },
+      { t: narrow ? 'Mito-\nchondrium' : 'Mitochondrium', side: 'R', ty: m.y - 0.02 * G.H, ax: m.x + m.rx * 0.85, ay: m.y },
+      { t: narrow ? 'Vesikel' : 'synaptisches\nVesikel', side: 'R', ty: G.preY - 0.14 * G.H, ax: lastDock.x + G.vr * 0.7, ay: lastDock.y - G.vr * 0.6 },
+      { t: narrow ? 'Cholin-\nTransp.' : 'Cholin-\nTransporter', side: 'R', ty: G.preY - 0.05 * G.H, ax: G.trX[1] + 5 * s, ay: G.preY - 4 * s },
+      { t: narrow ? 'AChE' : 'Acetylcholin-\nesterase', side: 'R', ty: G.blY, ax: lastEnz.x + 8 * s, ay: lastEnz.y },
+      { t: narrow ? 'ACh-\nRezeptor' : 'ACh-Rezeptor\n(Na⁺-Kanal)', side: 'R', ty: G.postY + 0.075 * G.H, ax: lastRec.x + 10 * s, ay: G.postY + 4 * s }
+    ];
+    for (const it of items) {
+      const lines = it.t.split('\n'), tx = it.tx != null ? it.tx : (it.side === 'L' ? Lx : Rx);
+      c.textAlign = it.side === 'L' ? 'right' : 'left';
+      let maxw = 0; for (const l of lines) maxw = Math.max(maxw, c.measureText(l).width);
+      const lx = it.side === 'L' ? tx + 4 : tx - 4;
+      c.strokeStyle = hexA(T.muted, 0.9); c.lineWidth = 1;
+      c.beginPath(); c.moveTo(lx, it.ty); c.lineTo(it.ax, it.ay); c.stroke();
+      c.fillStyle = T.muted; c.beginPath(); c.arc(it.ax, it.ay, 1.9, 0, 6.2832); c.fill();
+      const y0 = it.ty - (lines.length - 1) * lh / 2;
+      lines.forEach((l, i) => {
+        c.lineWidth = 3.5; c.strokeStyle = T.halo; c.lineJoin = 'round'; c.strokeText(l, tx, y0 + i * lh);
+        c.fillStyle = T.label; c.fillText(l, tx, y0 + i * lh);
+      });
+    }
+    c.textAlign = 'left';
+    const post = narrow ? ['Postsynapse'] : ['Postsynapse', '(z. B. Muskelfaser)'];
+    const py = G.postY + 0.45 * (H - G.postY);
+    post.forEach((l, i) => {
+      c.font = `${i === 0 ? '700 ' : ''}${fs}px system-ui, -apple-system, sans-serif`;
+      c.lineWidth = 3.5; c.strokeStyle = hexA(T.post, 0.9); c.strokeText(l, 12, py + i * lh);
+      c.fillStyle = T.label; c.fillText(l, 12, py + i * lh);
+    });
+    c.restore();
+  }
+
+  /* ---------- Oszilloskop ---------- */
+  function drawScope() {
+    const c = sctx, b = E.buf, t = E.t;
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
+    c.fillStyle = T['scope-bg']; c.fillRect(0, 0, SW, SH);
+    const narrow = SW < 520, win = narrow ? 30 : 40;
+    const padL = 10, padR = 10, padT = 4, axisH = 22, laneH = (SH - padT - axisH) / 3;
+    const x0 = padL, x1 = SW - padR, pw = x1 - x0, tx = tt => x1 - (t - tt) / win * pw;
+    c.lineWidth = 1;
+    for (let k = 0; k <= win / 5; k++) {
+      const x = x1 - k * 5 / win * pw;
+      c.strokeStyle = T['scope-grid']; c.globalAlpha = k % 2 === 0 ? 1 : 0.5;
+      c.beginPath(); c.moveTo(x + 0.5, padT); c.lineTo(x + 0.5, SH - axisH); c.stroke();
+    }
+    c.globalAlpha = 1;
+    c.font = '10.5px ui-monospace, Menlo, monospace'; c.textBaseline = 'middle'; c.fillStyle = T['scope-text'];
+    for (let k = 0; k <= win / 10; k++) {
+      const x = x1 - k * 10 / win * pw;
+      c.textAlign = k === 0 ? 'right' : k === win / 10 ? 'left' : 'center';
+      c.fillText(k === 0 ? 'jetzt' : '−' + k * 10 + ' ms', x, SH - axisH / 2);
+    }
+    const lanes = [
+      { key: 'pre', name: 'Präsynapse', lo: -90, hi: 45, col: T['tr-pre'], unit: 'mV', refs: [[-70, '−70'], [0, '0']] },
+      { key: 'ach', name: 'ACh im Spalt', lo: 0, hi: 70, col: T['tr-ach'], unit: 'Moleküle', refs: [] },
+      { key: 'post', name: 'Postsynapse', lo: -90, hi: 45, col: T['tr-post'], unit: 'mV', refs: [[-70, '−70'], [0, '0']], th: -50 }
+    ];
+    lanes.forEach((L, li) => {
+      const ly0 = padT + li * laneH, ly1 = ly0 + laneH;
+      const vy = v => ly1 - 6 - (clamp(v, L.lo, L.hi) - L.lo) / (L.hi - L.lo) * (laneH - 20);
+      if (li > 0) { c.strokeStyle = T['scope-grid']; c.beginPath(); c.moveTo(0, ly0 + 0.5); c.lineTo(SW, ly0 + 0.5); c.stroke(); }
+      c.setLineDash([2, 4]);
+      for (const [v, lab] of L.refs) {
+        const y = Math.round(vy(v)) + 0.5;
+        c.strokeStyle = T['scope-grid']; c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke();
+        c.textAlign = 'left'; c.fillStyle = T['scope-text']; c.globalAlpha = 0.7; c.fillText(lab, x0 + 2, y - 7); c.globalAlpha = 1;
+      }
+      if (L.th != null) {
+        const y = Math.round(vy(L.th)) + 0.5;
+        c.strokeStyle = hexA(T['tr-th'], 0.65); c.beginPath(); c.moveTo(x0, y); c.lineTo(x1, y); c.stroke();
+        c.textAlign = 'left'; c.fillStyle = T['tr-th']; c.fillText('Schwelle −50', x0 + 34, y - 7);
+      }
+      c.setLineDash([]);
+      // Kurve
+      c.save(); c.beginPath(); c.rect(x0, ly0, pw, laneH); c.clip();
+      c.strokeStyle = L.col; c.lineWidth = 1.7; c.lineJoin = 'round';
+      if (!reduce) { c.shadowColor = L.col; c.shadowBlur = 6; }
+      c.beginPath();
+      let started = false;
+      const arr = b[L.key], start = (b.i - b.n + C.BUF) % C.BUF;
+      for (let j = 0; j < b.n; j++) {
+        const i = (start + j) % C.BUF, tt = b.t[i];
+        if (tt < t - win - 0.2) continue;
+        const x = tx(tt), y = vy(arr[i]);
+        if (!started) { c.moveTo(x, y); started = true; } else c.lineTo(x, y);
+      }
+      c.stroke(); c.restore();
+      // Beschriftung der Spur
+      c.textAlign = 'left'; c.fillStyle = T['scope-text']; c.font = '10.5px ui-monospace, Menlo, monospace';
+      c.fillText(L.name.toUpperCase(), x0 + 2, ly0 + 10);
+      const cur = b.n ? arr[(b.i - 1 + C.BUF) % C.BUF] : 0;
+      c.textAlign = 'right'; c.fillStyle = L.col; c.font = '500 11.5px ui-monospace, Menlo, monospace';
+      c.fillText(L.key === 'ach' ? Math.round(cur) + ' ' + L.unit : mv(cur) + ' mV', x1 - 2, ly0 + 10);
+      c.font = '10.5px ui-monospace, Menlo, monospace';
+    });
+  }
+
+  /* ---------- Ablauf, Status, Messwerte ---------- */
+  const stepEls = Array.from($('steps').children), stepSeen = new Array(7).fill(-1e9);
+  function scan(now) {
+    let fusing = false, achFree = 0, caIn = false, cho = false, open = false, busy = false;
+    for (const v of E.ves) if (v.st === 'fusing') { fusing = true; break; }
+    for (const q of E.parts) {
+      if (q.k === 'ach' && q.st === 'free') achFree++;
+      else if (q.k === 'ca' && q.st === 'path') caIn = true;
+      else if (q.k === 'cho' && q.st !== 'fade') cho = true;
+    }
+    for (const r of E.recs) if (r.open) { open = true; break; }
+    for (const e of E.enz) if (e.busy) { busy = true; break; }
+    let caOpen = false; for (const ch of E.caCh) if (ch.amt > 0.2) caOpen = true;
+    const f = [
+      E.axonWaves.length > 0 || E.vpre > -55,
+      caOpen || caIn,
+      fusing,
+      achFree > 0,
+      open,
+      E.vs > -66 || E.t - E.postAp < 3,
+      busy || cho
+    ];
+    f.forEach((on, i) => { if (on) stepSeen[i] = now; });
+  }
+  let lastStatus = '';
+  function updateUI(now) {
+    stepEls.forEach((li, i) => li.classList.toggle('active', now - stepSeen[i] < 450));
+    const t = E.t, rc = E.readyCount();
+    let cls = 'neutral', txt = 'Ruhezustand';
+    if (E.p.toxin === 'latro' && rc.total === 0) { cls = 'crit'; txt = 'Vesikelvorrat erschöpft'; }
+    else if (E.p.toxin === 'bot' && E.docks.every(d => d.blocked)) { cls = 'crit'; txt = 'Exocytose blockiert'; }
+    else if ((E.p.toxin === 'nic' || E.p.toxin === 'sarin' || E.p.ache < 0.5) && E.vs > -58 && E.h < C.HMIN && t - E.postAp > 8) { cls = 'crit'; txt = 'Dauerdepolarisation: Postsynapse unerregbar'; }
+    else if (t - E.postAp < 4) { cls = 'ok'; txt = 'Postsynaptisches AP ausgelöst'; }
+    else if (E.lastResult && t - E.lastResult.t < 25) {
+      if (E.lastResult.ok) { cls = 'ok'; txt = 'Übertragung erfolgreich'; } else { cls = 'warn'; txt = 'Unterschwellig: kein AP'; }
+    }
+    else if (E.axonWaves.length || E.evals.length) { txt = 'Übertragung läuft'; }
+    if ((E.p.toxin === 'mus' || E.p.toxin === 'atr') && cls === 'ok') txt += ' (Gift ohne Angriffspunkt)';
+    if (!running) { cls = 'neutral'; txt = 'Pausiert'; }
+    const key = cls + txt;
+    if (key !== lastStatus) { const el = $('status'); el.className = 'status ' + (cls === 'neutral' ? '' : cls); el.textContent = txt; lastStatus = key; }
+    let achN = 0; for (const q of E.parts) if (q.k === 'ach' && (q.st === 'free' || q.st === 'bound')) achN++;
+    $('rV').textContent = mv(E.vpost) + ' mV';
+    $('rOpen').textContent = E.nOpen + ' / ' + E.recs.length;
+    $('rAch').textContent = achN;
+    $('rVes').textContent = rc.docked + ' · ' + rc.total;
+    $('apCount').textContent = `Aktionspotenziale: ${E.preApCount} prä · ${E.postApCount} post`;
+  }
+
+  /* ---------- Gifte ---------- */
+  const TOX = {
+    none: { name: 'Kein Gift', site: null, text: 'Normale Erregungsübertragung. Wähle ein Gift, um zu sehen, an welcher Stelle der Übertragung es eingreift.' },
+    cur: { name: 'Curare', site: 'post', icon: 'M6 1 L11 10.5 L1 10.5 Z', text: 'Pfeilgift südamerikanischer Indigener, gewonnen aus Lianen. Curare bindet an die ACh-Rezeptoren, ohne den Kanal zu öffnen, und verdrängt ACh (kompetitive Hemmung). Das EPSP bleibt unterschwellig, die Muskulatur erschlafft; tödlich ist die Atemlähmung.' },
+    nic: { name: 'Nikotin', site: 'post', icon: 'M6 0.8 L10.5 3.4 L10.5 8.6 L6 11.2 L1.5 8.6 L1.5 3.4 Z', text: 'Alkaloid der Tabakpflanze und Namensgeber des nikotinischen ACh-Rezeptors. Nikotin öffnet den Kanal wie ACh (Agonist), wird aber nicht von der Acetylcholinesterase gespalten. In hoher Dosis bleibt die Postsynapse depolarisiert, ihre Na⁺-Kanäle inaktivieren, und es entstehen keine neuen Aktionspotenziale.' },
+    sarin: { name: 'Sarin', site: 'cleft', icon: 'M6 0.8 L11.2 6 L6 11.2 L0.8 6 Z', text: 'Nervenkampfstoff aus der Gruppe der Organophosphate; wirkt nach demselben Prinzip wie das Insektizid E605. Sarin hemmt die Acetylcholinesterase irreversibel, indem es ihr aktives Zentrum blockiert. ACh wird nicht mehr gespalten und bindet immer wieder an die Rezeptoren: Dauererregung, Krämpfe, schließlich Lähmung; tödlich ist die Atemlähmung. Die Hemmung bleibt, bis du das Gift wechselst oder zurücksetzt.' },
+    bot: { name: 'Botulinumtoxin', site: 'pre', icon: 'M2 3.4 L3.4 2 L6 4.6 L8.6 2 L10 3.4 L7.4 6 L10 8.6 L8.6 10 L6 7.4 L3.4 10 L2 8.6 L4.6 6 Z', text: 'Bakteriengift von Clostridium botulinum und eines der stärksten bekannten Gifte; in winzigen Mengen medizinisch als „Botox“ genutzt. Es zerschneidet SNARE-Proteine, die Vesikel zum Verschmelzen brauchen. Die Vesikel docken an, geben aber kein ACh mehr ab: schlaffe Lähmung.' },
+    mus: { name: 'Muscarin', site: 'post', icon: 'M6 0.8 L11 4.5 L9.1 10.6 L2.9 10.6 L1 4.5 Z', text: 'Gift des Fliegenpilzes. Muscarin aktiviert muskarinische ACh-Rezeptoren (Agonist), die bei Parasympathikus-Synapsen an Herz, Drüsen und glatter Muskulatur sitzen: Speichelfluss, verlangsamter Herzschlag, verengte Pupillen. Die Rezeptoren dieser Synapse, einer motorischen Endplatte, sind aber nikotinisch. Muscarin passt nicht zu ihnen und bindet nicht: Die Übertragung bleibt unverändert.' },
+    atr: { name: 'Atropin', site: 'post', icon: 'M4 1 L8 1 L11 4 L11 8 L8 11 L4 11 L1 8 L1 4 Z', text: 'Gift der Tollkirsche. Atropin blockiert muskarinische ACh-Rezeptoren kompetitiv, ohne sie zu aktivieren: erweiterte Pupillen, beschleunigter Herzschlag, trockener Mund. Die nikotinischen Rezeptoren dieser Synapse blockiert es nicht, die Übertragung bleibt unverändert. Medizinisch dient Atropin als Gegenmittel bei Vergiftungen mit Acetylcholinesterase-Hemmern wie Sarin oder E605.' }
+  };
+  function showTox(k) {
+    const d = TOX[k];
+    $('toxName').textContent = d.name; $('toxText').textContent = d.text;
+    document.querySelectorAll('.site span').forEach(sp => sp.classList.toggle('on', sp.dataset.site === d.site));
+    $('dose').disabled = k === 'none';
+    const leg = $('legTox');
+    leg.hidden = k === 'none';
+    if (k !== 'none') {
+      $('legToxName').textContent = d.name;
+      $('legToxIcon').innerHTML = `<path d="${d.icon}" style="fill:var(--toxin)" fill-rule="evenodd"/>`;
+    }
+  }
+
+  /* ---------- Bedienung ---------- */
+  const DEF = { caOut: 2.0, nRec: 10, ache: 100 };
+  function outCa(v) { $('caOutOut').textContent = de(v, 1) + ' mM'; }
+  function outFreq(v) { $('freqOut').textContent = `${v} Hz · alle ${de(1000 / v, 1000 / v % 1 ? 1 : 0)} ms`; }
+  function outSpeed() { const sp = SPEEDS[speedIdx]; $('speedOut').textContent = `${de(sp, sp < 1 ? 2 : 0)}× · 1 ms ≙ ${de(1 / (BASE * sp), 2)} s`; }
+
+  function fireAP() { if (!running) setRunning(true); E.fire(); }
+  function setRunning(on) {
+    running = on;
+    const b = $('btnPause'); b.textContent = on ? 'Pause' : 'Weiter'; b.setAttribute('aria-pressed', on ? 'false' : 'true');
+  }
+  $('btnAP').addEventListener('click', fireAP);
+  $('btnPause').addEventListener('click', () => setRunning(!running));
+  $('btnReset').addEventListener('click', () => { E.reset(); drawStatic(); lastStatus = ''; });
+  document.addEventListener('keydown', e => {
+    if (e.code !== 'Space' || e.repeat) return;
+    if (e.target.closest && e.target.closest('input, button, select, textarea, summary, a')) return;
+    e.preventDefault(); fireAP();
+  });
+  $('train').addEventListener('change', e => E.set('train', e.target.checked));
+  $('freq').addEventListener('input', e => { const v = +e.target.value; E.set('freq', v); outFreq(v); });
+  $('caOut').addEventListener('input', e => { const v = +e.target.value; E.set('caOut', v); outCa(v); });
+  $('nRec').addEventListener('input', e => { const v = +e.target.value; E.set('nRec', v); $('nRecOut').textContent = v; });
+  $('ache').addEventListener('input', e => { const v = +e.target.value; E.set('ache', v / 100); $('acheOut').textContent = v + ' %'; });
+  document.querySelectorAll('input[name="tox"]').forEach(r => r.addEventListener('change', e => { if (e.target.checked) { E.set('toxin', e.target.value); showTox(e.target.value); } }));
+  $('dose').addEventListener('input', e => { const v = +e.target.value; E.set('dose', v / 100); $('doseOut').textContent = v + ' %'; });
+  $('speed').addEventListener('input', e => { speedIdx = +e.target.value; outSpeed(); });
+  $('labels').addEventListener('change', e => { labels = e.target.checked; });
+  $('btnDefaults').addEventListener('click', () => {
+    $('caOut').value = DEF.caOut; E.set('caOut', DEF.caOut); outCa(DEF.caOut);
+    $('nRec').value = DEF.nRec; E.set('nRec', DEF.nRec); $('nRecOut').textContent = DEF.nRec;
+    $('ache').value = DEF.ache; E.set('ache', 1); $('acheOut').textContent = DEF.ache + ' %';
+  });
+
+  /* ---------- Start ---------- */
+  sizeSim(); sizeScope();
+  $('speed').value = speedIdx; outSpeed(); outFreq(40);
+  const ro = new ResizeObserver(() => { sizeSim(); sizeScope(); });
+  ro.observe(wrap); ro.observe(swrap);
+  const retheme = () => { readTokens(); drawStatic(); };
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', retheme);
+  new MutationObserver(retheme).observe(root, { attributes: true, attributeFilter: ['data-theme'] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { lastStatus = ''; });
+
+  let last = performance.now(), uiT = 0;
+  function frame(now) {
+    const rdt = Math.min(60, now - last); last = now;
+    if (running) E.step(rdt / 1000 * BASE * SPEEDS[speedIdx]);
+    draw(); drawScope(); scan(now);
+    if (now - uiT > 120) { updateUI(now); uiT = now; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  setTimeout(() => { if (E.preApCount === 0) E.fire(); }, 900);
+})();
+
+</script>
+
+</body></html>
